@@ -1,0 +1,95 @@
+<html>
+	<head>
+		<style>
+			.c {border-style: solid;}
+			.r {font-size: 50px;}
+		</style>
+	</head>
+	<body>
+		<center>
+		<div>
+			Please draw your phone number:
+		</div>
+		<div id="demo">
+			<div class="output">
+
+				<div id="output">
+					<div id="text"></div>
+					<span id="timing"></span>
+				</div>
+			</div>
+			<canvas id='c' class="c" width="600" height="300"></canvas>
+			<div class="buttons">
+				<button id="clear" onclick="reset_canvas()">&times;</div>
+			</div>
+			<div id='result' class="r">
+			
+			</div>
+			<div>
+				This site stolen entirely from <a href='http://antimatter15.com/ocrad.js/demo.html'>OCRAD</a>
+			</div>
+		</div>
+	</body>
+		<script src="ocrad.js"></script>
+		<script>
+			//this site entirely stolen from http://antimatter15.com/ocrad.js/demo.html
+			function runOCR(){
+				var result= OCRAD(document.getElementById('c'));
+				var e=document.getElementById('result');
+				e.innerHTML=result;
+				console.log(result);
+			}
+			var c = document.getElementById('c'),
+				o = c.getContext('2d');
+
+			function reset_canvas(){
+				o.fillStyle = 'white'
+				o.fillRect(0, 0, c.width, c.height)
+				o.fillStyle = 'black'	
+				var e=document.getElementById('result');
+				e.innerHTML="";
+			}
+
+			var drag = false, lastX, lastY;
+			c.onmousedown = function(e){ drag = true; lastX = 0; lastY = 0; e.preventDefault(); c.onmousemove(e) }
+			c.onmouseup   = function(e){ drag = false; e.preventDefault(); runOCR() }
+			c.onmousemove = function(e){
+				e.preventDefault()
+				var rect = c.getBoundingClientRect();
+				var r = 5;
+
+				function dot(x, y){
+					o.beginPath()
+					o.moveTo(x + r, y)
+					o.arc(x, y, r, 0, Math.PI * 2)
+					o.fill()
+				}
+				if(drag){
+					var x = e.clientX - rect.left, 
+						y = e.clientY - rect.top;
+					
+					if(lastX && lastY){
+						var dx = x - lastX, dy = y - lastY;
+						var d = Math.sqrt(dx * dx + dy * dy);
+						for(var i = 1; i < d; i += 2){
+							dot(lastX + dx / d * i, lastY + dy / d * i)
+						}
+					}
+					dot(x, y)
+					lastX = x;
+					lastY = y;
+				}
+			}
+			document.body.ondragover = function(){ document.body.className = 'dragging'; return false }
+			document.body.ondragend = function(){ document.body.className = ''; return false }
+			document.body.onclick = function(){document.body.className = '';}
+			document.body.ondrop = function(e){
+				e.preventDefault();
+				document.body.className = '';
+				picked_file(e.dataTransfer.files[0]);
+				return false;
+			}
+			runOCR();
+			reset_canvas();
+		</script>	
+</html>
